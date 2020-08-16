@@ -5,3 +5,6 @@ def mask_upper_half_matrix(mat, val=0.0, include_diagonal=False):
     offset = 0 if include_diagonal else 1
     ind = torch.tru_indices(h, w, offset=offset)
     mat[:,ind[0],ind[1]] = val
+
+def device_selection():
+    return 'cuda' if torch.cuda.is_available() else 'cpu'

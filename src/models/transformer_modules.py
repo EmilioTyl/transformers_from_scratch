@@ -2,8 +2,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+import pdb
 class SelfAttention(nn.Module):
-    def __init__(self, embeding, k, mask=False, heads=10):
+    def __init__(self, k, mask=False, heads=10):
         super().__init__()
         self.k = k
         self.h = heads
@@ -64,10 +65,9 @@ class SelfAttention(nn.Module):
         return self.dimension_reduce(output)
 
 class TransformerModule(nn.Module):
-    
     def __init__(self, k, heads, hidden_layer_mult=4):
         super().__init__()
-        self.self_attention = SelfAttention(k, heads)
+        self.self_attention = SelfAttention(k=k, heads=heads)
         self.layer_norm_1 = nn.LayerNorm(k)
         self.feed_forward = nn.Sequential(
             nn.Linear(k, hidden_layer_mult * k),

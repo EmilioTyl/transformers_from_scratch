@@ -65,9 +65,9 @@ class SelfAttention(nn.Module):
         return self.dimension_reduce(output)
 
 class TransformerModule(nn.Module):
-    def __init__(self, k, heads, hidden_layer_mult=4):
+    def __init__(self, k, heads, mask=False, hidden_layer_mult=4):
         super().__init__()
-        self.self_attention = SelfAttention(k=k, heads=heads)
+        self.self_attention = SelfAttention(k=k, heads=heads, mask=mask)
         self.layer_norm_1 = nn.LayerNorm(k)
         self.feed_forward = nn.Sequential(
             nn.Linear(k, hidden_layer_mult * k),

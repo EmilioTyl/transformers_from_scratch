@@ -43,4 +43,35 @@ class ClassSequenceTransformer(nn.Module):
         output = self.output_ff(averged_output_vector)
         output = F.log_softmax(output, dim=1)
         return output
-        
+
+
+class GenerationCharacterTransformer(nn.Module):
+    def __init__(self, embedding_size, transformer_heads, depth, max_sequence, token_size):
+        super().__init__()
+        self.embedding_size = embedding_size
+        self.transformer_heads = transformer_heads
+        self.depth = depth
+        self.max_sequence = max_sequence
+        self.token_size = token_size
+
+        self.character_embeding = nn.Embedding(num_embeddings=token_size, embedding_dim=embedding_size)
+        self.pos_embedding = nn.Embedding(num_embeddings=max_sequence, embedding_dim=embedding_size)
+        #With mask
+        transformers_list = [TransformerModule(k=embedding_size, heads=self.transformer_heads, hidden_layer_mult=4, mask=True) for _ in range(self.depth)]
+        self.transformer = nn.Sequential(*transformers_list)
+
+        self.output_ff = nn.Linear(self.embedding_size, token_size)
+
+    def forward(self, x):
+        # x sequence is size b(batch), t(sequence), embeding(k)
+        characters = self.character_embeding(x)
+        b, t, k = characters.size()
+        pos = self.pos_embedding(torch.arange(t, device=device_selection()))[None,:,:].expand(b, t, k)
+
+        mix = characters + pos
+        #Flaten in the batch dimension
+        mix = mix.view(b*t, k)
+        output = self.output_ff(mix)
+        #Recover dimension sequence
+        output = output.view(b, t, self.token_size)
+        return F.log_softmax(output, dim=2)

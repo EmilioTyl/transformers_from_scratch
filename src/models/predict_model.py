@@ -69,9 +69,10 @@ class GenerationCharacterTransformer(nn.Module):
         pos = self.pos_embedding(torch.arange(t, device=device_selection()))[None,:,:].expand(b, t, k)
 
         mix = characters + pos
+        t_output = self.transformer(mix)
         #Flaten in the batch dimension
-        mix = mix.view(b*t, k)
-        output = self.output_ff(mix)
+        t_output = t_output.view(b*t, k)
+        output = self.output_ff(t_output)
         #Recover dimension sequence
         output = output.view(b, t, self.token_size)
         return F.log_softmax(output, dim=2)

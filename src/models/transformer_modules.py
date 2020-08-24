@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import pdb
+from .model_utils import mask_upper_half_matrix
 class SelfAttention(nn.Module):
     def __init__(self, k, mask=False, heads=10):
         super().__init__()
@@ -51,7 +52,7 @@ class SelfAttention(nn.Module):
         if self.mask:
             # mask the upper diagonal, excluding the diagonal,
             # so each vector has no notion of the next vectors of the sequence
-            mask_upper_half_matrix(self.weights, val=-np.inf, include_diagonal=False)
+            mask_upper_half_matrix(weights, val=-np.inf, include_diagonal=False)
 
         soft_weights = F.softmax(weights, dim=2)
         #Multiply weights b*h,t,t x b*h,t,k => b*h,t,k 
